@@ -11,7 +11,7 @@ grammar2 ::= Grammar (
 	nonterminals :: { S1, S2 } ;
 	alphabet :: { a, b, c } ;
 	start_symbol :: S1 ;
-	SS1 -> y&S2&y ;
+	S1 -> y&S2S1&y ;
 	S2 -> y&S1 | e ;
 ) ;;
 automata5 ::= PushDownAutomata (

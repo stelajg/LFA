@@ -43,25 +43,37 @@ transition_stack {stack_alphabet}?&?{stack_alphabet}?
 {numele}/" ::= PushDownAutomata" {printf("Numele automatului: %s\n", yytext);
                                     printf("Tipul automatului: Automat cu stiva\n");
                                     BEGIN(INITIAL_AUTOMATA);}
-<INITIAL>"alphabet :: {" {printf("am ajuns la inceput %s\n", yytext);
-                                alphabet.push_back('{');
-                                BEGIN(AL);
-                            }
-<AL>{alphabet} {printf("am ajuns la alphabet = %s\n", yytext);
-                alphabet.push_back(yytext[0]);
-                BEGIN(AL);};
-<AL>" }" {printf("am ajuns la urma %s\n", yytext);
-            BEGIN(START_GRAMMAR);}
-<START_GRAMMAR>{nonterminals_trans} {printf("am ajuns la start %s\n", yytext);
-            BEGIN(GRAMMAR_TYPE);}
-<START_GRAMMAR>{gdc}" ->" {printf("am ajuns la gfr+++ %s\n", yytext);
+<INITIAL>"alphabet :: {" { alphabet.push_back('{');
+                            BEGIN(AL);}
+<AL>{alphabet} { alphabet.push_back(yytext[0]);
+                 BEGIN(AL);}
+<AL>"," { alphabet.push_back(yytext[0]);
+          alphabet.push_back(' ');
+          BEGIN(AL);}
+<AL>" }" { alphabet.push_back('}');
+           BEGIN(START_GRAMMAR);}
+<START_GRAMMAR>{nonterminals_trans} { printf("am ajuns la start %s\n", yytext);
+                                      BEGIN(GRAMMAR_TYPE);}
+<START_GRAMMAR>{gdc}" ->" {printf("am ajuns la gfr+++ %s\n", yytext); GFR = true;
                     BEGIN(GRAMMAR_TYPE);}
-<GRAMMAR_TYPE>{gr} {printf("am ajuns la gr %s\n", yytext);}
-<GRAMMAR_TYPE>{gic} {printf("am ajuns la gic %s\n", yytext);}
-<GRAMMAR_TYPE>{gdc} {printf("am ajuns la gdc %s\n", yytext);}
+<GRAMMAR_TYPE>{gr} {printf("am ajuns la gr %s\n", yytext); GR = true;}
+<GRAMMAR_TYPE>{gic} {printf("am ajuns la gic %s\n", yytext); GIC = true;}
+<GRAMMAR_TYPE>{gdc} {printf("am ajuns la gdc %s\n", yytext);GDC = true;}
 <GRAMMAR_TYPE>";" {printf("am ajuns la final de linie %s\n", yytext);
                 BEGIN(START_GRAMMAR);}         
-<START_GRAMMAR>";;" { cout << "Alfabetul gramaticii: {" << alphabet <<" }" << endl;
+<START_GRAMMAR>";;" {if(GFR){
+                        printf("Tipul gramaticii: GFR\n");} 
+                    else if(GDC){
+                        printf("Tipul gramaticii: GDC\n");} 
+                    else if(GIC){
+                        printf("Tipul gramaticii: GIC\n");}
+                    else if(GR){
+                        printf("Tipul gramaticii: GR\n");}
+                     GFR = false;
+                     GR = false;
+                     GIC = false;
+                     GDC = false;
+                     cout << "Alfabetul gramaticii: " << alphabet << endl;
                      printf("\n");
                      alphabet.clear();}
 <INITIAL_AUTOMATA>"alphabet ::" { printf("Alfabetulde intrare : ");
@@ -139,9 +151,8 @@ transition_stack {stack_alphabet}?&?{stack_alphabet}?
                               state_aux = aux;
                               BEGIN(TRANSITION);}
 .|\n ;
-
-
 %%
+
 int main()
 {
     yylex();
